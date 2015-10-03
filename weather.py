@@ -31,7 +31,10 @@ def get_weather(location, date):
     try:
         forecast = get_forecast(location)
         w = forecast.get_weather_at(date)
-        return w.get_status()
+        if isinstance(location, str):
+            return 'The weather in ' + location + ' is ' + w.get_status()
+        else:
+            return w.get_status()
 
     except Exception as e:
         print e
@@ -48,7 +51,7 @@ def get_weather_verbose(location, date):
     try:
         forecast = get_forecast(location)
         w = forecast.get_weather_at(date)
-        return get_readable_weather(w)
+        return get_readable_weather(location, w)
 
     except Exception as e:
         return "Weather couldn't be obtain."
@@ -65,11 +68,11 @@ def get_weather_very_verbose(location, date):
         forecast = get_forecast(location)
         verb_str = get_weather_verbose(location, date)
         w = forecast.get_weather_at(date)
-        return verb_str + get_readable_weather_very_verbose(w)
+        return verb_str + get_readable_weather_very_verbose(location, w)
     except Exception as e:
         return "Weather couldn't be obtain."
 
-def get_readable_weather(weather):
+def get_readable_weather(location, weather):
     """"
         :param weather: Weather object contains weather data
         :type weather : pyowm.webapi25.weather.Weather
@@ -78,10 +81,14 @@ def get_readable_weather(weather):
     temp_ = weather.get_temperature('celsius')['day']
     temp_ = "{0:.0f}".format(round(temp_))
     status_ = weather.get_detailed_status()
-    return "{status} weather. The temperature is {temp} in degrees Celsius. "\
-        .format(status=status_,temp=temp_)
+    if isinstance(location, str):
+        return "It's {status} weather in {location}. The temperature is {temp} in degrees Celsius. "\
+            .format(location=location, status=status_, temp=temp_)
+    else:
+        return "{status} weather. The temperature is {temp} in degrees Celsius. "\
+            .format(location=location, status=status_, temp=temp_)
 
-def get_readable_weather_very_verbose(weather):
+def get_readable_weather_very_verbose(location, weather):
     """"
         :param weather: Weather object contains weather data
         :type weather : pyowm.webapi25.weather.Weather
