@@ -2,7 +2,7 @@
 # libraries: sox curl postgresql
 # python: wit flask flask-restful wikipedia owm psycopg2
 from datetime import datetime, timedelta
-import datetime
+import datetime as dt
 import dateutil.parser
 
 import random
@@ -97,7 +97,7 @@ def handle_weather(location, entities):
         date = datetime.now()
 
     continuation = ''
-    if date.date() == datetime.date(2015, 10, 05):
+    if date.date() == dt.date(2015, 10, 05):
         continuation = ". Don't forget to visit your mother."
 
     if 'weather_detail' in entities:
