@@ -129,7 +129,7 @@ def will_be_weather(location, date, weather_type):
     """
     try:
         forecast = get_forecast(location)
-        return {
+        value = {
             'cloudy': forecast.will_be_cloudy_at(date),
             'foggy': forecast.will_be_foggy_at(date),
             'hurricane': forecast.will_be_hurricane_at(date),
@@ -139,6 +139,17 @@ def will_be_weather(location, date, weather_type):
             'sunny': forecast.will_be_sunny_at(date),
             'tornado': forecast.will_be_tornado_at(date),
         }[weather_type]
+
+        if isinstance(location, str):
+            if value:
+                return "It's {feature} in {location}".format(feature=weather_type, location=location)
+            else:
+                return "It's not {feature} in {location}".format(feature=weather_type, location=location)
+        else:
+            if value:
+                return "It's {feature}".format(feature=weather_type)
+            else:
+                return "It's not {feature}".format(feature=weather_type)
 
     except Exception as e:
         return "Weather couldn't be obtain."

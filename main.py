@@ -55,6 +55,17 @@ auth_schema = {
     'required': ['user', 'password']
 }
 
+possible_weather_detail = [
+    'cloudy',
+    'foggy',
+    'hurricane',
+    'rainy',
+    'snowy',
+    'stormy',
+    'sunny',
+    'tornado',
+]
+
 app = Flask(__name__)
 app.debug = True
 
@@ -71,6 +82,11 @@ def handle_weather(location, entities):
             date = date + timedelta(hours=12)
     else:
         date = datetime.now()
+
+    if 'weather_detail' in entities:
+        filtered_detail = filter(lambda x: x['value'] in possible_weather_detail, entities['weather_detail'])
+        if len(filtered_detail) > 0:
+            return weather.will_be_weather(loc, date, filtered_detail[0]['value'])
 
     return random.choice([weather.get_weather, weather.get_weather_verbose, weather.get_weather_very_verbose])(loc, date)
 
