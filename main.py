@@ -1,7 +1,14 @@
+# Dependencies:
+# libraries: sox, curl
+# python: wit flask flask-restful
 from flask import Flask, request
 from flask_restful import Resource, Api
 
 from jsonschema import validate
+
+import wit_script
+
+import config
 
 mock_token = 'jaskldfjaslkdf'
 
@@ -35,6 +42,13 @@ app.debug = True
 
 api = Api(app)
 
+def handle_weather(location, entities):
+    return 'handling weather'
+
+intent_handlers = {
+    'weather': handle_weather
+}
+
 class Root(Resource):
     def post(self):
         args = request.get_json(force = True)
@@ -42,15 +56,19 @@ class Root(Resource):
         
         request_text = args['text']
 
-        # Parse request_string with wit.ai
+        wit_response = wit_script.wit_function(config.wit_token, request_text)
+        intent = wit_response['intent']
 
-        # Dispatch request
+        if intent in intent_handlers:
+            response_text = intent_handlers[intent](args['coordinates'], wit_response['entities'])
+        else:
+            response_text = "Can't handle intent " + intent
 
         # Generate questions and startListening?
 
         # Save request, response and location to database
 
-        return { 'respText': request_text, 'startListening': False }
+        return { 'respText': response_text, 'startListening': False }
 
 class Authorize(Resource):
     def post(self):
