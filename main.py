@@ -1,12 +1,18 @@
 # Dependencies:
 # libraries: sox, curl
-# python: wit flask flask-restful
+# python: wit flask flask-restful wikipedia owm
+from datetime import datetime
+
 from flask import Flask, request
 from flask_restful import Resource, Api
 
 from jsonschema import validate
 
 import wit_script
+
+import weather
+
+import wikipedia
 
 import config
 
@@ -43,10 +49,18 @@ app.debug = True
 api = Api(app)
 
 def handle_weather(location, entities):
-    return 'handling weather'
+    location = 'London, UK'
+    date = datetime.now()
+    print date
+    return weather.get_weather(config.pyowm_key, location, date)
+
+def handle_search(location, entities):
+    search_term = entities['search_query'][0]['value']
+    return wikipedia.summary(search_term, sentences=1)
 
 intent_handlers = {
-    'weather': handle_weather
+    'weather': handle_weather,
+    'search': handle_search
 }
 
 class Root(Resource):
