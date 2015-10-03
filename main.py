@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_restful import Resource, Api
 
 app = Flask(__name__)
@@ -7,8 +7,9 @@ app.debug = True
 api = Api(app)
 
 class Root(Resource):
-    def get(self):
-        return { 'result': 'Hello, world!' }
+    def post(self):
+        args = request.get_json(force = True)
+        return { 'respText': args['text'] }
 
 api.add_resource(Root, '/')
 
