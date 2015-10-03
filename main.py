@@ -1,7 +1,8 @@
 # Dependencies:
-# libraries: sox, curl postgresql
+# libraries: sox curl postgresql
 # python: wit flask flask-restful wikipedia owm psycopg2
 from datetime import datetime, timedelta
+import datetime
 import dateutil.parser
 
 import random
@@ -20,6 +21,18 @@ import wikipedia
 import config
 
 import psycopg2
+
+continuation = None
+
+def get_continuation():
+    global continuation
+    result = continuation
+    continuation = None
+    return result
+
+def set_continuation(f):
+    global continuation
+    continuation = f
 
 conn = psycopg2.connect(
     database=config.db_database,
@@ -83,12 +96,16 @@ def handle_weather(location, entities):
     else:
         date = datetime.now()
 
+    continuation = ''
+    if date.date() == datetime.date(2015, 10, 05):
+        continuation = ". Don't forget to visit your mother."
+
     if 'weather_detail' in entities:
         filtered_detail = filter(lambda x: x['value'] in possible_weather_detail, entities['weather_detail'])
         if len(filtered_detail) > 0:
-            return weather.will_be_weather(loc, date, filtered_detail[0]['value'])
+            return weather.will_be_weather(loc, date, filtered_detail[0]['value']) + continuation
 
-    return random.choice([weather.get_weather, weather.get_weather_verbose, weather.get_weather_very_verbose])(loc, date)
+    return random.choice([weather.get_weather, weather.get_weather_verbose, weather.get_weather_very_verbose])(loc, date) + continuation
 
 def handle_search(location, entities):
     search_term = entities['search_query'][0]['value']
@@ -104,6 +121,10 @@ class Root(Resource):
         args = request.get_json(force = True)
         validate(args, request_schema)
         
+        continuation = get_continuation()
+        if continuation is not None:
+            return continuation(args)
+
         request_text = args['text']
 
         wit_response = wit_script.wit_function(config.wit_token, request_text)
@@ -120,7 +141,7 @@ class Root(Resource):
         print 'Request: ', request_text
         print 'Response: ', response_text
 
-        return { 'respText': response_text, 'startListening': False }
+        return { 'respText': response_text, 'startListening': False, 'intent': intent }
 
 class Authorize(Resource):
     def post(self):
