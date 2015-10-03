@@ -17,6 +17,7 @@ def get_forecast(location):
         else:
             forecast = owm.daily_forecast_at_coords(location['lat'], location['lot'])
         return forecast
+
     except Exception as e:
         return None
 
@@ -29,7 +30,7 @@ def get_weather(location, date):
         :return simple weather info
     """
     forecast = get_forecast(location)
-    if  forecast == None :
+    if  forecast == None:
         return "Weather couldn't be obtain."
 
     try:
@@ -49,7 +50,7 @@ def get_weather_verbose(location, date):
     """
 
     forecast = get_forecast(location)
-    if  forecast == None :
+    if  forecast == None:
         return "Weather couldn't be obtain."
 
     # get weather
@@ -69,7 +70,7 @@ def get_weather_very_verbose(location, date):
         :return detailed weather info about temperature, humidity, shiness
     """
     forecast = get_forecast(location)
-    if  forecast == None :
+    if  forecast == None:
         return "Weather couldn't be obtain."
 
     # get weather
@@ -131,17 +132,25 @@ def will_be_weather(location, date, weather_type):
         :type weather_type: str
         :return boolean about specific weather condition at given location and date
     """
-    fc = owm.daily_forecast(location)
-    return {
-        'cloudy': fc.will_be_cloudy_at(date),
-        'foggy': fc.will_be_foggy_at(date),
-        'hurricane': fc.will_be_hurricane_at(date),
-        'rainy': fc.will_be_rainy_at(date),
-        'snowy': fc.will_be_snowy_at(date),
-        'stormy': fc.will_be_stormy_at(date),
-        'sunny': fc.will_be_sunny_at(date),
-        'tornado': fc.will_be_tornado_at(date),
-    }[weather_type]
+    forecast = get_forecast(location)
+    if  forecast == None:
+        return "Weather couldn't be obtain."
+
+    # get weather
+    try:
+        return {
+            'cloudy': forecast.will_be_cloudy_at(date),
+            'foggy': forecast.will_be_foggy_at(date),
+            'hurricane': forecast.will_be_hurricane_at(date),
+            'rainy': forecast.will_be_rainy_at(date),
+            'snowy': forecast.will_be_snowy_at(date),
+            'stormy': forecast.will_be_stormy_at(date),
+            'sunny': forecast.will_be_sunny_at(date),
+            'tornado': forecast.will_be_tornado_at(date),
+        }[weather_type]
+
+    except Exception as e:
+        return "Weather couldn't be obtain."
 
 
 def will_have_weather(location, weather_type):
@@ -152,17 +161,25 @@ def will_have_weather(location, weather_type):
         :type weather_type: str
         :return boolean about specific weather condition at given location and forecast period
     """
-    fc = owm.daily_forecast(location)
-    return {
-        'cloudy': fc.will_have_clouds(),
-        'foggy': fc.will_have_fog(),
-        'hurricane': fc.will_have_hurricane(),
-        'rainy': fc.will_have_rain(),
-        'snowy': fc.will_have_snow(),
-        'stormy': fc.will_have_storm(),
-        'sunny': fc.will_have_sun(),
-        'tornado': fc.will_have_tornado(),
-    }[weather_type]
+    forecast = get_forecast(location)
+    if  forecast == None:
+        return "Weather couldn't be obtain."
+
+    # get weather
+    try:
+        return {
+            'cloudy': forecast.will_have_clouds(),
+            'foggy': forecast.will_have_fog(),
+            'hurricane': forecast.will_have_hurricane(),
+            'rainy': forecast.will_have_rain(),
+            'snowy': forecast.will_have_snow(),
+            'stormy': forecast.will_have_storm(),
+            'sunny': forecast.will_have_sun(),
+            'tornado': forecast.will_have_tornado(),
+        }[weather_type]
+
+    except Exception as e:
+        return "Weather couldn't be obtain."
 
 
 def when_weather(location, weather_type):
@@ -173,27 +190,36 @@ def when_weather(location, weather_type):
         :type weather_type: str
         :return datetime.datetime object list when weather condition occurs 
     """
-    fc = owm.daily_forecast(location)
-    weathers = {
-        'cloudy': fc.when_clouds(),
-        'foggy': fc.when_fog(),
-        'hurricane': fc.when_hurricane(),
-        'rainy': fc.when_rain(),
-        'snowy': fc.when_snow(),
-        'stormy': fc.when_storm(),
-        'sunny': fc.when_sun(),
-        'tornado': fc.when_tornado(),
-    }[weather_type]
+    forecast = get_forecast(location)
+    if  forecast == None:
+        return "Weather couldn't be obtain."
 
-    # UNIX datestamps of weather measurement
-    unix_dates = map(lambda x: x.get_reference_time(), weathers)
+    # get weather
+    try:
+        weathers = {
+            'cloudy': forecast.when_clouds(),
+            'foggy': forecast.when_fog(),
+            'hurricane': forecast.when_hurricane(),
+            'rainy': forecast.when_rain(),
+            'snowy': forecast.when_snow(),
+            'stormy': forecast.when_storm(),
+            'sunny': forecast.when_sun(),
+            'tornado': forecast.when_tornado(),
+        }[weather_type]
 
-    # datetime.datetime objects
-    date_dates = map(lambda x: pyowm.utils.timeformatutils.to_date(x), unix_dates)
+        # UNIX datestamps of weather measurement
+        unix_dates = map(lambda x: x.get_reference_time(), weathers)
 
-    return date_dates
+        # datetime.datetime objects
+        date_dates = map(lambda x: pyowm.utils.timeformatutils.to_date(x), unix_dates)
 
-# Some functions are not implemented right in the pyowm library
+        return date_dates
+
+    except Exception as e:
+        return "Weather couldn't be obtain."
+
+
+# Some functions are not implemented right now in the pyowm library
 def most_weather(location, weather_type):
     """
         :param location : City name || 'lat', 'lot' values
@@ -202,26 +228,33 @@ def most_weather(location, weather_type):
         :type weather_type: str
         :return datetime.datetime object when weather condition is most
     """
-    fc = owm.daily_forecast(location)
-    weather = {
-        # Not working in library
-        # 'cold': fc.most_cold(),
+    forecast = get_forecast(location)
+    if  forecast == None:
+        return "Weather couldn't be obtain."
 
-        # Not working in library
-        # 'hot': fc.most_hot(),
+    # get weather
+    try:
+        weather = {
+            # Not working in library
+            # 'cold': forecast.most_cold(),
 
-        'humid': fc.most_humid(),
-        'rainy': fc.most_rainy(),
-        'snowy': fc.most_snowy(),
+            # Not working in library
+            # 'hot': forecast.most_hot(),
 
-        # Not working in library
-        # 'windy': fc.most_windy(),
-    }[weather_type]
+            'humid': forecast.most_humid(),
+            'rainy': forecast.most_rainy(),
+            'snowy': forecast.most_snowy(),
 
-    if weather:
-        unix_weather = weather.get_reference_time()
-        date_weather = pyowm.utils.timeformatutils.to_date(unix_weather)
-        return date_weather
+            # Not working in library
+            # 'windy': forecast.most_windy(),
+        }[weather_type]
 
-    return None
+        if weather:
+            unix_weather = weather.get_reference_time()
+            date_weather = pyowm.utils.timeformatutils.to_date(unix_weather)
+            return date_weather
 
+        return None
+
+    except Exception as e:
+        return "Weather couldn't be obtain."
