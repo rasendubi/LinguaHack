@@ -1,7 +1,10 @@
 # Dependencies:
-# libraries: sox, curl
-# python: wit flask flask-restful wikipedia owm
-from datetime import datetime
+# libraries: sox, curl postgresql
+# python: wit flask flask-restful wikipedia owm psycopg2
+from datetime import datetime, timedelta
+import dateutil.parser
+
+import random
 
 from flask import Flask, request
 from flask_restful import Resource, Api
@@ -15,6 +18,15 @@ import weather
 import wikipedia
 
 import config
+
+import psycopg2
+
+conn = psycopg2.connect(
+    database=config.db_database,
+    user=config.db_user,
+    password=config.db_password,
+    host=config.db_host
+)
 
 mock_token = 'jaskldfjaslkdf'
 
@@ -49,10 +61,18 @@ app.debug = True
 api = Api(app)
 
 def handle_weather(location, entities):
-    location = 'London, UK'
-    date = datetime.now()
-    print date
-    return weather.get_weather(config.pyowm_key, location, date)
+    loc = { 'lat': location['Latitude'], 'lot': location['Longitude'] }
+    if 'location' in entities:
+        loc = str(entities['location'][0]['value'])
+
+    if 'datetime' in entities:
+        date = dateutil.parser.parse(entities['datetime'][0]['value'])
+        if entities['datetime'][0]['grain'] == 'day':
+            date = date + timedelta(hours=12)
+    else:
+        date = datetime.now()
+
+    return random.choice([weather.get_weather, weather.get_weather_verbose, weather.get_weather_very_verbose])(loc, date)
 
 def handle_search(location, entities):
     search_term = entities['search_query'][0]['value']
@@ -81,6 +101,8 @@ class Root(Resource):
         # Generate questions and startListening?
 
         # Save request, response and location to database
+        print 'Request: ', request_text
+        print 'Response: ', response_text
 
         return { 'respText': response_text, 'startListening': False }
 
@@ -98,4 +120,5 @@ api.add_resource(Root, '/')
 api.add_resource(Authorize, '/auth')
 
 if __name__ == '__main__':
+    weather.init_owm(config.pyowm_key)
     app.run(host = '0.0.0.0')

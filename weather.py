@@ -6,20 +6,19 @@ import pyowm
 Weather service API.
 """
 
-owm = pyowm.OWM('')
+owm = None
+
+def init_owm(key):
+    global owm
+    owm = pyowm.OWM(key)
 
 def get_forecast(location):
-    # parse location
-    try:
-        if isinstance(location, str) :
-            forecast = owm.daily_forecast(location)
-            # else coordinates was passed
-        else:
-            forecast = owm.daily_forecast_at_coords(location['lat'], location['lot'])
-        return forecast
-
-    except Exception as e:
-        return None
+    if isinstance(location, str) :
+        forecast = owm.daily_forecast(location)
+        # else coordinates was passed
+    else:
+        forecast = owm.daily_forecast_at_coords(location['lat'], location['lot'])
+    return forecast
 
 def get_weather(location, date):
     """
@@ -29,15 +28,13 @@ def get_weather(location, date):
         :type date: python.datetime.datetime
         :return simple weather info
     """
-    forecast = get_forecast(location)
-    if  forecast == None:
-        return "Weather couldn't be obtain."
-
     try:
+        forecast = get_forecast(location)
         w = forecast.get_weather_at(date)
         return w.get_status()
 
     except Exception as e:
+        print e
         return "Weather couldn't be obtain."
 
 def get_weather_verbose(location, date):
@@ -48,13 +45,8 @@ def get_weather_verbose(location, date):
         :type date: python.datetime.datetime
         :return weather info about temperature
     """
-
-    forecast = get_forecast(location)
-    if  forecast == None:
-        return "Weather couldn't be obtain."
-
-    # get weather
     try:
+        forecast = get_forecast(location)
         w = forecast.get_weather_at(date)
         return get_readable_weather(w)
 
@@ -69,12 +61,8 @@ def get_weather_very_verbose(location, date):
         :type date: python.datetime.datetime
         :return detailed weather info about temperature, humidity, shiness
     """
-    forecast = get_forecast(location)
-    if  forecast == None:
-        return "Weather couldn't be obtain."
-
-    # get weather
     try:
+        forecast = get_forecast(location)
         verb_str = get_weather_verbose(location, date)
         w = forecast.get_weather_at(date)
         return verb_str + get_readable_weather_very_verbose(w)
@@ -132,12 +120,8 @@ def will_be_weather(location, date, weather_type):
         :type weather_type: str
         :return boolean about specific weather condition at given location and date
     """
-    forecast = get_forecast(location)
-    if  forecast == None:
-        return "Weather couldn't be obtain."
-
-    # get weather
     try:
+        forecast = get_forecast(location)
         return {
             'cloudy': forecast.will_be_cloudy_at(date),
             'foggy': forecast.will_be_foggy_at(date),
@@ -161,12 +145,8 @@ def will_have_weather(location, weather_type):
         :type weather_type: str
         :return boolean about specific weather condition at given location and forecast period
     """
-    forecast = get_forecast(location)
-    if  forecast == None:
-        return "Weather couldn't be obtain."
-
-    # get weather
     try:
+        forecast = get_forecast(location)
         return {
             'cloudy': forecast.will_have_clouds(),
             'foggy': forecast.will_have_fog(),
@@ -190,12 +170,8 @@ def when_weather(location, weather_type):
         :type weather_type: str
         :return datetime.datetime object list when weather condition occurs 
     """
-    forecast = get_forecast(location)
-    if  forecast == None:
-        return "Weather couldn't be obtain."
-
-    # get weather
     try:
+        forecast = get_forecast(location)
         weathers = {
             'cloudy': forecast.when_clouds(),
             'foggy': forecast.when_fog(),
@@ -228,12 +204,8 @@ def most_weather(location, weather_type):
         :type weather_type: str
         :return datetime.datetime object when weather condition is most
     """
-    forecast = get_forecast(location)
-    if  forecast == None:
-        return "Weather couldn't be obtain."
-
-    # get weather
     try:
+        forecast = get_forecast(location)
         weather = {
             # Not working in library
             # 'cold': forecast.most_cold(),
