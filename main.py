@@ -13,4 +13,4 @@ class Root(Resource):
 api.add_resource(Root, '/')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host = '0.0.0.0')
