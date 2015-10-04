@@ -68,17 +68,6 @@ auth_schema = {
     'required': ['user', 'password']
 }
 
-possible_weather_detail = [
-    'cloudy',
-    'foggy',
-    'hurricane',
-    'rainy',
-    'snowy',
-    'stormy',
-    'sunny',
-    'tornado',
-]
-
 app = Flask(__name__)
 app.debug = True
 
@@ -98,10 +87,10 @@ def handle_weather(location, entities):
 
     continuation = ''
     if date.date() == dt.date(2015, 10, 05):
-        continuation = ". Don't forget to visit your mother."
+        continuation = " Don't forget to visit your mother."
 
     if 'weather_detail' in entities:
-        filtered_detail = filter(lambda x: x['value'] in possible_weather_detail, entities['weather_detail'])
+        filtered_detail = filter(lambda x: x['value'] in weather.possible_weather_detail, entities['weather_detail'])
         if len(filtered_detail) > 0:
             return weather.will_be_weather(loc, date, filtered_detail[0]['value']) + continuation
 
@@ -111,9 +100,15 @@ def handle_search(location, entities):
     search_term = entities['search_query'][0]['value']
     return wikipedia.summary(search_term, sentences=1)
 
+def handle_navigate_places(location, entities):
+    destination = entities['location'][0]['value']
+
+    return 'Building path to ' + destination
+
 intent_handlers = {
     'weather': handle_weather,
-    'search': handle_search
+    'search': handle_search,
+    'navigate_places': handle_navigate_places,
 }
 
 class Root(Resource):

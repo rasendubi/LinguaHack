@@ -8,6 +8,17 @@ Weather service API.
 
 owm = None
 
+possible_weather_detail = [
+    'cloudy',
+    'foggy',
+    'hurricane',
+    'rainy',
+    'snowy',
+    'stormy',
+    'sunny',
+    'tornado',
+]
+
 def init_owm(key):
     global owm
     owm = pyowm.OWM(key)
@@ -32,9 +43,9 @@ def get_weather(location, date):
         forecast = get_forecast(location)
         w = forecast.get_weather_at(date)
         if isinstance(location, str):
-            return 'The weather in ' + location + ' is ' + w.get_status()
+            return 'The weather in ' + location + ' is ' + w.get_status() + '.'
         else:
-            return w.get_status()
+            return w.get_status() + '.'
 
     except Exception as e:
         print e
@@ -82,10 +93,10 @@ def get_readable_weather(location, weather):
     temp_ = "{0:.0f}".format(round(temp_))
     status_ = weather.get_detailed_status()
     if isinstance(location, str):
-        return "It's {status} weather in {location}. The temperature is {temp} in degrees Celsius. "\
+        return "It's {status} weather in {location}. The temperature is {temp} in degrees Celsius."\
             .format(location=location, status=status_, temp=temp_)
     else:
-        return "{status} weather. The temperature is {temp} in degrees Celsius. "\
+        return "{status} weather. The temperature is {temp} in degrees Celsius."\
             .format(location=location, status=status_, temp=temp_)
 
 def get_readable_weather_very_verbose(location, weather):
@@ -142,14 +153,14 @@ def will_be_weather(location, date, weather_type):
 
         if isinstance(location, str):
             if value:
-                return "It's {feature} in {location}".format(feature=weather_type, location=location)
+                return "It's {feature} in {location}.".format(feature=weather_type, location=location)
             else:
-                return "It's not {feature} in {location}".format(feature=weather_type, location=location)
+                return "It's not {feature} in {location}.".format(feature=weather_type, location=location)
         else:
             if value:
-                return "It's {feature}".format(feature=weather_type)
+                return "It's {feature}.".format(feature=weather_type)
             else:
-                return "It's not {feature}".format(feature=weather_type)
+                return "It's not {feature}.".format(feature=weather_type)
 
     except Exception as e:
         return "Weather couldn't be obtain."
