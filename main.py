@@ -1,9 +1,10 @@
 # Dependencies:
 # libraries: sox curl postgresql
-# python: wit flask flask-restful wikipedia owm psycopg2
+# python: wit flask flask-restful wikipedia owm psycopg2 googlemaps
 from datetime import datetime, timedelta
 import datetime as dt
 import dateutil.parser
+from dateutil.tz import *
 
 import random
 
@@ -105,10 +106,44 @@ def handle_navigate_places(location, entities):
 
     return 'Building path to ' + destination
 
+def format_time(time, grain):
+    now = datetime.now()
+
+    # from pytz import reference
+    # tz = reference.LocalTimezone()
+    # time = time.astimezone(tz)
+
+    result = ''
+    if time.year != now.year:
+        result += str(time.year) + ' year, '
+    if time.year != now.year or time.month != now.month:
+        result += time.strftime("%B") + ', '
+    if time.year != now.year or time.month != now.month or time.day != now.day:
+        result += str(time.day) + ', '
+    result += time.strftime("%H:%M")
+
+    return result
+
+def handle_reminder(location, entities):
+    time = None
+    time_str = ''
+    if 'datetime' in entities:
+        time = dateutil.parser.parse(entities['datetime'][0]['value'])
+        time_str = format_time(time, entities['datetime'][0]['grain'])
+
+    action = None
+    if 'reminder' in entities:
+        action = entities['reminder'][0]['value']
+
+    # TODO save in database
+
+    return 'I will remind you to ' + action + ' at ' + time_str
+
 intent_handlers = {
     'weather': handle_weather,
     'search': handle_search,
     'navigate_places': handle_navigate_places,
+    'reminder': handle_reminder,
 }
 
 class Root(Resource):
